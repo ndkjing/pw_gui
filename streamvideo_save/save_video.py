@@ -8,7 +8,6 @@ demo
 4) port      端口号，默认为 554  都是默认值
 '''
 import cv2
-
 # url = 'rtsp://admin:create741025@192.168.8.168:554/h264/ch1/main/av_stream'  # 根据摄像头设置IP及rtsp端口
 url = 'rtsp://admin:123456@192.168.8.168:554/h264/ch1/main/av_stream'  # 根据摄像头设置IP及rtsp端口
 
@@ -30,18 +29,19 @@ def save_video(cap):
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     # fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
     # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    out = cv2.VideoWriter('output.avi', fourcc, fps, (width, height))  # 图像大小参数按（宽，高）一定得与写入帧大小一致
+    size = (width, height)
+    out = cv2.VideoWriter('output.avi', fourcc, fps, size)  # 图像大小参数按（宽，高）一定得与写入帧大小一致
     while (cap.isOpened()):
         # Capture frame-by-frame
         ret, frame = cap.read()
         if not ret:
             print('video is over ')
             break
-        # print(frame.shape)
-        # Display the resulting frame
-        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        cv2.imshow('capture', frame)  # 显示结果
+        frame = cv2.resize(frame, size)
         out.write(frame)
-
+        if cv2.waitKey(1) & 0xFF == ord('q'):  # 按q停止,按q退出时，为什么要用0xFF呢？& 比 == 优先级高，所以先截取最后八位，再做比较。
+            break
 
     # When everything done, release the capture
     cap.release()
@@ -66,5 +66,9 @@ def show_video(cap):
 
 if __name__=='__main__':
     cap = get_video_cap(url=url)
-    # save_video(cap)
-    show_video(cap)
+    save_video(cap)
+    src = 'output.avi'
+    dst = 'output.mp4'
+    import ffmpy3
+    ffmpy3.FFmpeg(inputs={src: None}, outputs={dst: None}).run()
+    # show_video(cap)

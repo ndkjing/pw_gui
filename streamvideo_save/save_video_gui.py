@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication,QInputDialog,QLineEdit,QLabel
 import cv2
-
+import ffmpy3
 
 class Example(QMainWindow):
 
@@ -47,7 +47,7 @@ class Example(QMainWindow):
             self.cap = self.get_video_cap()
             if self.cap is None:
                 print('输入ip地址或者用户名错误')
-            while True:
+            while self.cap.isOpened():
                 # Capture frame-by-frame
                 ret, frame = self.cap.read()
                 if not ret:
@@ -62,7 +62,6 @@ class Example(QMainWindow):
     def show_video(self):
         sender = self.sender()
         self.statusBar().showMessage(sender.text() + ' was pressed')
-
         self.cap = self.get_video_cap()
         while True:
             ret, frame = self.cap.read()
@@ -95,11 +94,16 @@ class Example(QMainWindow):
 
     ## 关闭视频
     def close_video(self):
+
         sender = self.sender()
         self.statusBar().showMessage(sender.text() + ' was pressed')
         self.cap.release()
         self.out.release()
         cv2.destroyAllWindows()
+        src = 'output.avi'
+        dst = 'output.mp4'
+        ffmpy3.FFmpeg(inputs={src: None}, outputs={dst: None}).run()
+
 
     ## 初始化UI
     def initUI(self):
